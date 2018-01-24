@@ -32,6 +32,7 @@ for i in range(0, len(sentence) - seq_length):
     dataX.append(x)
     dataY.append(y)
 
+d = '/device:GPU:5'
 with tf.device(d):
     X = tf.placeholder(tf.int32, [None, seq_length])
     Y = tf.placeholder(tf.int32, [None, seq_length])
