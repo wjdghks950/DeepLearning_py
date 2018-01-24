@@ -39,7 +39,7 @@ print(X_one_hot)
 
 
 cell = rnn.BasicLSTMCell(hidden_size, state_is_tuple=True)
-cell = rnn.MultiRNNCell([cell]*2, state_is_tuple=True)
+cell = rnn.MultiRNNCell([cell]*2, state_is_tuple=True) #Two-layers of RNN
 
 outputs, _states = tf.nn.dynamic_rnn(cell, X_one_hot, dtype=tf.float32)
 
@@ -62,7 +62,7 @@ mean_loss = tf.reduce_mean(sequence_loss)
 train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(mean_loss)
 
 
-sess = tf.Session()
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 sess.run(tf.global_variables_initializer())
 
 for i in range(500):

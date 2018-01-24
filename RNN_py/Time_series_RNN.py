@@ -23,9 +23,9 @@ iterations = 1000
 lr = 0.01
 
 #Stock price format (Open, High, Low, Close, Volume)
-xy = np.loadtxt('data-02-stock-daily.csv', delimiter=',')
+xy = np.loadtxt('data-02-stock_daily.csv', delimiter=',')
 xy = xy[::-1] #reverse the order (chronologically ordered)
-xy = MinMaxScalar(xy) # to normalize the values
+xy = MinMaxScalar(xy) # to normalize the fluctuating values 
 x = xy
 y = xy[:, [-1]]
 
@@ -60,7 +60,7 @@ loss = tf.reduce_sum(tf.square(Y_pred - Y))
 optimizer = tf.train.AdamOptimizer(lr)
 train = optimizer.minimize(loss)
 
-sess = tf.Session()
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 sess.run(tf.global_variables_initializer())
 
 for i in range(iterations):
@@ -68,4 +68,8 @@ for i in range(iterations):
 	print(i, ": ", "loss: ", l)
 
 testPredict = sess.run(Y_pred, feed_dict={X: testX})
- 
+print('test prediction value: ', testPredict[:-1])
+
+#plt.plot(testY)
+#plt.plot(testPredict)
+#plt.show() 
