@@ -32,45 +32,48 @@ for i in range(0, len(sentence) - seq_length):
     dataX.append(x)
     dataY.append(y)
 
-d = '/device:GPU:5'
-with tf.device(d):
-    X = tf.placeholder(tf.int32, [None, seq_length])
-    Y = tf.placeholder(tf.int32, [None, seq_length])
+#d = '/device:GPU:6'
+#with tf.device(d):
+X = tf.placeholder(tf.int32, [None, seq_length])
+Y = tf.placeholder(tf.int32, [None, seq_length])
 
-    batch_size = len(dataX)
-
-    #One-hot encoding
-    X_one_hot = tf.one_hot(X, num_classes)
-
-    cell = rnn.BasicLSTMCell(hidden_size, state_is_tuple=True)
-    cell = rnn.MultiRNNCell([cell]*3, state_is_tuple=True) #3-layer RNN
+batch_size = 20
     
-    outputs, _states = tf.nn.dynamic_rnn(cell, X_one_hot, dtype=tf.float32)
+#One-hot encoding
+X_one_hot = tf.one_hot(X, num_classes)
 
-    #softmax layer
-    X_for_softmax = tf.reshape(outputs, [-1, hidden_size])
+cell = rnn.BasicLSTMCell(hidden_size, state_is_tuple=True)
+cell = rnn.MultiRNNCell([cell]*3, state_is_tuple=True) #3-layer RNN
+    
+outputs, _states = tf.nn.dynamic_rnn(cell, X_one_hot, dtype=tf.float32)
 
-    softmax_w = tf.get_variable("softmax_w", [hidden_size, num_classes])
-    softmax_b = tf.get_variable("softmax_b", [num_classes])
+#softmax layer
+X_for_softmax = tf.reshape(outputs, [-1, hidden_size])
 
-    outputs = tf.matmul(X_for_softmax, softmax_w) + softmax_b
+softmax_w = tf.get_variable("softmax_w", [hidden_size, num_classes])
+softmax_b = tf.get_variable("softmax_b", [num_classes])
 
-    outputs = tf.reshape(outputs, [batch_size, seq_length, num_classes])
+outputs = tf.matmul(X_for_softmax, softmax_w) + softmax_b
 
-    weights = tf.ones([batch_size, seq_length])
+outputs = tf.reshape(outputs, [batch_size, seq_length, num_classes])
 
-    sequence_loss = tf.contrib.seq2seq.sequence_loss(logits=outputs, targets=Y, weights=weights)
+weights = tf.ones([batch_size, seq_length])
 
-    mean_loss = tf.reduce_mean(sequence_loss)
+sequence_loss = tf.contrib.seq2seq.sequence_loss(logits=outputs, targets=Y, weights=weights)
 
-    train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(mean_loss)
+mean_loss = tf.reduce_mean(sequence_loss)
+
+train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(mean_loss)
 
 #use gpu on the local device to train
-sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=True))
+#sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 for i in range(500):
-    _, l, results = sess.run([train_op, mean_loss, outputs], feed_dict={X:dataX, Y:dataY})
+    for b in range(0, len(dataX), batch_size):
+        _, l, results = sess.run([train_op, mean_loss, outputs], feed_dict={X:dataX[b:b+batch_size], Y:dataY[b:b+batch_size]})
+        print('Iter: ' + str(b) + ' Loss: ' + str(l))
 
     for j, result in enumerate(results):
         index = np.argmax(result, axis=1)
