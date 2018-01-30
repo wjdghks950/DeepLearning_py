@@ -5,6 +5,7 @@ import numpy as np
 '''
 This code takes Metamorphosis(kafka.txt), a short novel by Franz Kafka,
 to train a simple 3-layer RNN for language modelling.
+Seq2seq model with 3-layer RNN w/ LSTM cells.
 '''
 
 tf.reset_default_graph()
@@ -55,7 +56,8 @@ softmax_b = tf.get_variable("softmax_b", [num_classes])
 
 outputs = tf.matmul(X_for_softmax, softmax_w) + softmax_b
 
-outputs = tf.reshape(outputs, [batch_size, seq_length, num_classes])
+#outputs = tf.reshape(outputs, [batch_size, seq_length, num_classes])
+outputs = tf.reshape(outputs, [-1, seq_length, num_classes])
 
 weights = tf.ones([batch_size, seq_length])
 
@@ -74,6 +76,7 @@ for i in range(500):
     for b in range(0, len(dataX), batch_size):
         _, l, results = sess.run([train_op, mean_loss, outputs], feed_dict={X:dataX[b:b+batch_size], Y:dataY[b:b+batch_size]})
         print('Iter: ' + str(b) + ' Loss: ' + str(l))
+        print('Shape: ' + str(sess.run(tf.shape(results))))
 
     for j, result in enumerate(results):
         index = np.argmax(result, axis=1)
