@@ -59,7 +59,7 @@ outputs = tf.matmul(X_for_softmax, softmax_w) + softmax_b
 #outputs = tf.reshape(outputs, [batch_size, seq_length, num_classes])
 outputs = tf.reshape(outputs, [-1, seq_length, num_classes])
 
-weights = tf.ones([batch_size, seq_length])
+weights = tf.ones([batch_size, seq_length]) #TODO: batch_size -> -1 (not sure)
 
 sequence_loss = tf.contrib.seq2seq.sequence_loss(logits=outputs, targets=Y, weights=weights)
 
