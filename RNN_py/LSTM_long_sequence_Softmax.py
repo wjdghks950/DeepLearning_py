@@ -1,4 +1,3 @@
-from __future__ import print_function
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
@@ -70,8 +69,8 @@ for i in range(500):
     
     for j, result in enumerate(results):
         index = np.argmax(result, axis=1)
-	if i % 50 == 0:
-        	print(i, j, ''.join([char_set[t] for t in index]), l)
+    if i % 50 == 0:
+        print(i, j, ''.join([char_set[t] for t in index]), l)
 
 
 #Let's print the last char of each result to check if it works
